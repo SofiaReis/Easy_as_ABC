@@ -23,43 +23,50 @@ clueM([[H1,H2|_]|T],[Ch|Ct]):-
         Ch #= 0 #\/ Ch #= H1 #\/ (H1 #= 0 #/\ Ch #= H2),
         clueM(T,Ct).
 
-% Solution
 solve(L1,L2,L3,L4,Vars):-
-        %conv(L1, NL1),
-        %conv(L2,NL2),
-        %conv(L3,NL3),
-        %conv(L4,NL4),
-        length(L1, S),
+        conv(L1,NL1),
+        reverse(NL1,RNL1),
+        conv(L2,NL2),
+        reverse(NL2,RNL2),
+        conv(L3,NL3),
+        reverse(NL3,RNL3),
+        conv(L4,NL4),
+        reverse(NL4,RNL4),
+        solution(RNL1,RNL2,RNL3,RNL4,Vars).
+
+% Solution
+solution(NL1,NL2,NL3,NL4,Vars):-
+        length(NL1, S),
         length(Vars, S),
         gentab(Vars,S),
         transpose(Vars, TVars),
         gentab(TVars,S),
-        clueM(Vars,L1),
-        clueM(TVars,L2),
+        clueM(Vars,NL1),
+        clueM(TVars,NL2),
         reverse(TVars,RTVars),
         transpose(RTVars,TRTVars),
-        clueM(TRTVars,L3),reverse(Vars, RVars),
+        clueM(TRTVars,NL3),reverse(Vars, RVars),
         transpose(RVars, TRVars),
-        clueM(TRVars,L4),
+        clueM(TRVars,NL4),
         append(Vars,L),
-        labeling([],L),  
-        print_end(L1,L2,L3,L4,Vars).
+        reset_timer,
+        labeling([ff],L),
+        print_time,
+        fd_statistics,
+        print_end(NL1,NL2,NL3,NL4,Vars).
 
-
-%converte numbers->letters
-conv([],_).
-conv([L|T],NL):-
-        convert(A,L),
-        append(NL,[A],NewNL),
-        conv(T,NewNL).
+reset_timer :- statistics(walltime,_).  
+print_time :-
+        statistics(walltime,[_,T]),
+        TS is ((T//10)*10)/1000,
+        nl, write('Time: '), write(TS), write('s'), nl, nl.
 
 % print final board
 print_end(L1,L2,L3,L4,Vars):-
         nl,
         write(' '),print_clue(L2),nl,
         print_tab(0,Vars,L1,L3),
-        write(' '),print_clue(L4),
-        !.
+        write(' '),print_clue(L4).
 
 print_clue([]).
 print_clue([H|L]) :-
@@ -82,7 +89,12 @@ print_tab(N,[H|L],[L1|R1],[L3|R3]) :-
         N2 is N+1,
         print_tab(N2,L,R1,R3).
 
-% Traduction of numbers in letters
+conv([],_).
+conv([L|T],NL):-
+        convert(A,L),
+        append(NewNL,[A],NL),
+        conv(T,NewNL).
+
 convert(0,' ').
 convert(1,'A').
 convert(2,'B').
